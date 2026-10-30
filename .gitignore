@@ -12,4 +12,4 @@ ghostwatch.db
 .DS_Store
 node_modules/
 frontend/dist/
-frontend/.astro/
+frontend/.vite/
