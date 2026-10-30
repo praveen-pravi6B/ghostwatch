@@ -12,6 +12,11 @@
       Rule-based findings are still shown below.
     </div>
 
+    <!-- Clean bill of health -->
+    <div class="clean-notice" v-if="!result.rule_summary?.length && result.ai_available && !result.ai_error">
+      No deterministic rule findings in the collected events.
+    </div>
+
     <!-- Rule summary -->
     <section v-if="result.rule_summary?.length">
       <h3 class="section-label">Rule findings</h3>
@@ -65,6 +70,15 @@ defineProps({ result: Object })
   justify-content: space-between;
 }
 .panel-header h2 { font-size: 15px; font-weight: 600; }
+
+.clean-notice {
+  background: #0d2119;
+  border: 1px solid #2ea043;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--green);
+}
 
 .offline-notice {
   background: #2d1517;

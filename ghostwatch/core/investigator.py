@@ -39,8 +39,11 @@ async def investigate(events: list[GhostEvent], client: OllamaClient) -> Investi
                 seen.add(key)
                 rule_summaries.append(f"[{f.rule_id}] {f.description}")
 
-    # 2. Redact before AI
-    redacted = [redact_event(e) for e in events]
+    # 2. Send flagged events to AI first; fall back to most recent if none flagged.
+    # Cap at 15 events to keep the prompt manageable for small local models.
+    flagged = [e for e in events if e.rule_findings]
+    ai_events = flagged[:15] if flagged else events[:10]
+    redacted = [redact_event(e) for e in ai_events]
 
     # 3. Ask the model
     ai_result: dict = {}
