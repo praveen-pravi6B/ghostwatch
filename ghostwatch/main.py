@@ -32,10 +32,10 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:4321",   # Astro dev server
-        "http://127.0.0.1:4321",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
+        "http://localhost:5173",   # Vite dev server
+        "http://127.0.0.1:5173",
+        "http://localhost:4173",   # Vite preview
+        "http://127.0.0.1:4173",
     ],
     allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["*"],

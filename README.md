@@ -119,7 +119,7 @@ All settings are environment variables:
 ## Architecture
 
 ```
-Astro + React dashboard (frontend/)
+Vue 3 + Vite dashboard (frontend/)
          |
      FastAPI API (ghostwatch/api/)
          |
