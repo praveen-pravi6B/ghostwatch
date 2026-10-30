@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 
 from ghostwatch.ai.local_model import OllamaClient, OllamaUnavailableError
 from ghostwatch.core.redact import redact_event
-from ghostwatch.core.rules import apply_rules
 from ghostwatch.core.schema import GhostEvent
 
 
@@ -29,19 +28,21 @@ async def investigate(events: list[GhostEvent], client: OllamaClient) -> Investi
     The AI is given only redacted events. Findings from deterministic rules are stored
     independently and displayed alongside (not overridden by) the AI response.
     """
-    # 1. Apply deterministic rules
-    ruled_events = [apply_rules(e) for e in events]
-
-    # 2. Collect rule summaries for display
+    # 1. Events already have rules applied at collection time.
+    # Collect unique rule summaries for display.
     rule_summaries: list[str] = []
-    for ev in ruled_events:
+    seen: set[str] = set()
+    for ev in events:
         for f in ev.rule_findings:
-            rule_summaries.append(f"[{f.rule_id}] {f.description}")
+            key = f"{ev.id}:{f.rule_id}"
+            if key not in seen:
+                seen.add(key)
+                rule_summaries.append(f"[{f.rule_id}] {f.description}")
 
-    # 3. Redact before AI
-    redacted = [redact_event(e) for e in ruled_events]
+    # 2. Redact before AI
+    redacted = [redact_event(e) for e in events]
 
-    # 4. Ask the model
+    # 3. Ask the model
     ai_result: dict = {}
     ai_available = True
     ai_error: str | None = None
@@ -56,7 +57,7 @@ async def investigate(events: list[GhostEvent], client: OllamaClient) -> Investi
         ai_error = f"Unexpected AI error: {exc}"
 
     return Investigation(
-        events=ruled_events,
+        events=events,
         rule_summary=rule_summaries,
         ai_explanation=ai_result.get("explanation"),
         ai_evidence_refs=ai_result.get("evidence_references", []),

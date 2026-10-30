@@ -5,10 +5,12 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-# --- Ollama ---
+# --- Local AI server (llama.cpp or Ollama) ---
+# llama.cpp default: http://127.0.0.1:8080
+# Ollama default:    http://127.0.0.1:11434
 OLLAMA_BASE_URL: str = os.environ.get("GHOSTWATCH_OLLAMA_URL", "http://127.0.0.1:11434")
-OLLAMA_MODEL: str = os.environ.get("GHOSTWATCH_MODEL", "llama3.2")
-OLLAMA_TIMEOUT: float = float(os.environ.get("GHOSTWATCH_OLLAMA_TIMEOUT", "60"))
+OLLAMA_MODEL: str = os.environ.get("GHOSTWATCH_MODEL", "")   # llama.cpp ignores model field
+OLLAMA_TIMEOUT: float = float(os.environ.get("GHOSTWATCH_OLLAMA_TIMEOUT", "120"))
 
 # --- Storage ---
 DB_PATH: Path = Path(os.environ.get("GHOSTWATCH_DB", "ghostwatch.db"))

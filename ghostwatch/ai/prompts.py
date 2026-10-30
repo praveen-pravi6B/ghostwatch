@@ -33,20 +33,30 @@ Response schema:
 
 
 def build_user_message(events: list[GhostEvent]) -> str:
-    """Serialize redacted events into the user turn of the prompt."""
+    """Serialize redacted events into the user turn of the prompt.
+
+    Only include fields the model needs — keeps the prompt short for fast local inference.
+    """
     payload = []
     for ev in events:
-        payload.append({
+        entry: dict = {
             "id": ev.id,
-            "timestamp": ev.timestamp.isoformat(),
+            "time": ev.timestamp.strftime("%H:%M:%S"),
             "source": ev.source.value,
-            "event_type": ev.event_type,
+            "type": ev.event_type,
             "summary": ev.summary,
             "severity": ev.severity.value,
-            "process": ev.process.model_dump() if ev.process else None,
-            "evidence": ev.evidence,
-            "rule_findings": [f.model_dump() for f in ev.rule_findings],
-        })
+        }
+        if ev.process:
+            p = ev.process
+            entry["process"] = {k: v for k, v in {
+                "pid": p.pid, "name": p.name, "exe": p.exe,
+                "cmdline": " ".join(p.cmdline) if p.cmdline else None,
+                "user": p.username,
+            }.items() if v is not None}
+        if ev.rule_findings:
+            entry["rule_flags"] = [f.rule_id for f in ev.rule_findings]
+        payload.append(entry)
 
     return (
         "Investigate the following system events and return the JSON response:\n\n"
